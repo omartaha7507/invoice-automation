@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>Invoice desk</h1>
+      <p id="stats-line" class="stats-line">Loading…</p>
+    </div>
+    <div class="topbar-actions">
+      <a class="link-button" href="/api/export.csv?status=approved">Download approved as CSV</a>
+      <label class="button primary" for="file-input">Upload documents</label>
+      <input id="file-input" type="file" multiple accept=".pdf,.xml,.png,.jpg,.jpeg" hidden>
+    </div>
+  </header>
+
+  <div id="drop-hint" class="drop-hint" hidden>Drop PDFs, XML e-invoices or photos to process them</div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <main class="desk">
+    <section class="queue" aria-label="Documents">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-status="needs_review" aria-selected="true">To review <span id="count-needs_review"></span></button>
+        <button role="tab" data-status="approved" aria-selected="false">Approved <span id="count-approved"></span></button>
+        <button role="tab" data-status="rejected" aria-selected="false">Rejected <span id="count-rejected"></span></button>
+        <button role="tab" data-status="" aria-selected="false">All</button>
+      </nav>
+      <ul id="invoice-list" class="invoice-list"></ul>
+    </section>
+
+    <section id="detail" class="detail" aria-label="Selected document">
+      <div class="empty-detail">
+        <p>Select a document to check it, or upload new ones.</p>
+        <p class="muted">Clean invoices are approved and sent to accounting automatically. Only the ones that need a person show up under “To review”.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="detail-template">
+    <div class="viewer">
+      <div class="stamp" hidden>Geprüft<small></small></div>
+      <div class="viewer-frame"></div>
+    </div>
+    <form class="review" novalidate>
+      <div class="review-head">
+        <h2 class="doc-title"></h2>
+        <p class="doc-meta muted"></p>
+      </div>
+      <ul class="issues"></ul>
+
+      <fieldset>
+        <legend>Supplier</legend>
+        <label>Name <input name="supplier_name"></label>
+        <label>VAT ID <input name="supplier_vat_id"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Invoice</legend>
+        <label>Document type
+          <select name="document_type">
+            <option value="invoice">Invoice</option>
+            <option value="credit_note">Credit note</option>
+            <option value="delivery_note">Delivery note</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>Number <input name="invoice_number"></label>
+        <label>Date <input name="invoice_date" type="date"></label>
+        <label>Due <input name="due_date" type="date"></label>
+        <label>Purchase order <input name="po_number"></label>
+        <label>Buyer <input name="buyer_name"></label>
+      </fieldset>
+
+      <fieldset class="lines">
+        <legend>Line items</legend>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>VAT %</th><th>Total</th><th><span class="sr-only">Remove</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button type="button" class="link-button add-line">Add line</button>
+      </fieldset>
+
+      <fieldset class="totals">
+        <legend>Totals</legend>
+        <label>Net <input name="net_total" inputmode="decimal"></label>
+        <label>VAT <input name="vat_total" inputmode="decimal"></label>
+        <label>Total <input name="gross_total" inputmode="decimal"></label>
+        <label>Currency <input name="currency" maxlength="3"></label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="button primary approve">Approve and send to accounting</button>
+        <button type="button" class="button quiet reject">Reject</button>
+      </div>
+      <details class="history">
+        <summary>History</summary>
+        <ol class="audit"></ol>
+      </details>
+    </form>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

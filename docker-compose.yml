@@ -1,0 +1,48 @@
+# docker compose up --build   ->  review UI on http://localhost:8000
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: invoices
+      POSTGRES_PASSWORD: invoices
+      POSTGRES_DB: invoices
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U invoices"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment: &shared-env
+      DATABASE_URL: postgresql+psycopg://invoices:invoices@db:5432/invoices
+      DATA_DIR: /data
+      PURCHASE_ORDERS_CSV: /reference/purchase_orders.csv
+    volumes: &shared-volumes
+      - invoice-data:/data
+      - ./inbox:/data/inbox
+      - ./evaluation/dataset/purchase_orders.csv:/reference/purchase_orders.csv:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Background worker: processes anything dropped into ./inbox (and an email inbox if configured).
+  watcher:
+    build: .
+    command: ["python", "-m", "app.watcher"]
+    env_file: .env
+    environment: *shared-env
+    volumes: *shared-volumes
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  invoice-data:

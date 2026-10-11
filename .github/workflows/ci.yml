@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:  # manual run: also evaluates the real LLM (uses the free-tier quota)
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Unit and API tests
+        run: pytest -q
+      - name: Quality gate (every rule and routing decision on the labelled dataset)
+        run: >
+          python -m evaluation.run_eval --dataset evaluation/dataset --extractor oracle
+          --min-field-accuracy 1.0 --min-routing-accuracy 1.0 --max-false-approvals 0
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t invoice-automation .
+
+  llm-eval:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Evaluate Gemini extraction (fails if any bad invoice would be auto-approved)
+        run: python -m evaluation.run_eval --dataset evaluation/dataset --extractor gemini --max-false-approvals 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: llm-eval-report
+          path: evaluation/results/
