@@ -1,0 +1,13 @@
+[project]
+name = "invoice-automation"
+version = "1.0.0"
+description = "AI invoice processing: extraction, validation, human review and export to accounting"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["evaluation/dataset"]
