@@ -1,0 +1,5 @@
+# Never change line endings in binary files (would corrupt the sample PDFs and scans)
+*.pdf binary
+*.jpg binary
+*.jpeg binary
+*.png binary

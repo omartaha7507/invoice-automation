@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from io import BytesIO
-from typing import Optional
 
 from pypdf import PdfReader
 
@@ -15,15 +14,15 @@ def pdf_text(data: bytes) -> str:
     try:
         reader = PdfReader(BytesIO(data))
         return "\n".join((page.extract_text() or "") for page in reader.pages)
-    except Exception:  # a broken PDF is handled by falling back to the vision path
+    except Exception:  # noqa: BLE001 - a broken PDF is handled by falling back to the vision path
         return ""
 
 
-def find_embedded_einvoice(data: bytes) -> Optional[bytes]:
+def find_embedded_einvoice(data: bytes) -> bytes | None:
     """Return the XML invoice attached inside a ZUGFeRD / Factur-X PDF, if there is one."""
     try:
         attachments = PdfReader(BytesIO(data)).attachments
-    except Exception:
+    except Exception:  # noqa: BLE001 - pypdf raises many error types on damaged files; treat all as "no attachment"
         return None
     by_name = {name.lower(): contents for name, contents in attachments.items() if contents}
     for name in EMBEDDED_XML_NAMES:

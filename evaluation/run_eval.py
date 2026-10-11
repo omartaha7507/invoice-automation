@@ -17,7 +17,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.orm import sessionmaker
 
@@ -38,7 +38,7 @@ class OracleExtractor:
     """Returns the ground truth for the document currently being processed."""
 
     def __init__(self) -> None:
-        self.current: Optional[dict[str, Any]] = None
+        self.current: dict[str, Any] | None = None
 
     def _answer(self) -> ExtractedInvoice:
         assert self.current is not None
@@ -77,7 +77,7 @@ def line_items_match(expected: list[dict], actual: list[dict]) -> bool:
     return all(abs(a - b) <= 0.011 for a, b in zip(exp, act))
 
 
-def evaluate(dataset_dir: Path, extractor_name: str = "gemini", limit: Optional[int] = None) -> dict[str, Any]:
+def evaluate(dataset_dir: Path, extractor_name: str = "gemini", limit: int | None = None) -> dict[str, Any]:
     truth = json.loads((dataset_dir / "ground_truth.json").read_text(encoding="utf-8"))
     documents = truth["documents"][:limit] if limit else truth["documents"]
 
@@ -194,7 +194,7 @@ def summarise(records: list[dict[str, Any]], extractor_name: str) -> dict[str, A
 
 
 def to_markdown(s: dict[str, Any]) -> str:
-    pct = lambda v: f"{v * 100:.1f}%"  # noqa: E731
+    pct = lambda v: f"{v * 100:.1f}%"
     lines = [
         f"# Evaluation report ({s['extractor']} extractor, {s['documents']} documents)",
         "",

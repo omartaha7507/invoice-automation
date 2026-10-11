@@ -10,7 +10,7 @@ import json
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -31,7 +31,7 @@ class MockERPClient:
         self.outbox_dir.mkdir(parents=True, exist_ok=True)
 
     def push(self, payload: dict[str, Any]) -> str:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         reference = f"ERP-{now:%Y%m%d}-{payload['invoice_id']:06d}"
         record = {"erp_reference": reference, "received_at": now.isoformat(), **payload}
         path = self.outbox_dir / f"{now:%Y-%m-%d}.jsonl"

@@ -11,7 +11,7 @@ import io
 import random
 from dataclasses import dataclass, field
 from datetime import date, timedelta
-from typing import Any, Optional
+from typing import Any
 from xml.sax.saxutils import escape
 
 from app.redaction import iban_is_valid
@@ -127,7 +127,7 @@ class Facts:
     number: str
     issue_date: date
     due_date: date
-    po_number: Optional[str]
+    po_number: str | None
     lines: list[dict[str, Any]]
     net: float
     vat: float
@@ -351,7 +351,7 @@ def render_scan(pdf_bytes: bytes, rng: random.Random) -> bytes:
 def build_cii_xml(facts: Facts) -> bytes:
     """ZUGFeRD / Factur-X (EN 16931 profile) style CII XML."""
     s = facts.supplier
-    e = lambda value: escape(str(value))  # noqa: E731
+    e = lambda value: escape(str(value))
     lines = "".join(
         f"""
     <ram:IncludedSupplyChainTradeLineItem>
@@ -418,7 +418,7 @@ def build_cii_xml(facts: Facts) -> bytes:
 def build_ubl_xml(facts: Facts) -> bytes:
     """XRechnung style UBL 2.1 XML."""
     s = facts.supplier
-    e = lambda value: escape(str(value))  # noqa: E731
+    e = lambda value: escape(str(value))
     cur = facts.currency
     lines = "".join(
         f"""
