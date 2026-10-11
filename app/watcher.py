@@ -8,9 +8,9 @@ from __future__ import annotations
 import logging
 import shutil
 import time
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Callable
 
 from sqlalchemy.orm import Session
 

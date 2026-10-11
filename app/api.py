@@ -12,7 +12,6 @@ from collections import Counter
 from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, Response
@@ -116,7 +115,7 @@ def upload_documents(
 
 @app.get("/api/invoices", response_model=list[InvoiceSummary])
 def list_invoices(
-    status: Optional[str] = Query(None, description="needs_review, approved or rejected"),
+    status: str | None = Query(None, description="needs_review, approved or rejected"),
     limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
 ) -> list[Invoice]:
@@ -198,7 +197,7 @@ def stats(db: Session = Depends(get_db)) -> StatsOut:
     )
 
 
-def _de_amount(value: Optional[float]) -> str:
+def _de_amount(value: float | None) -> str:
     return "" if value is None else f"{value:.2f}".replace(".", ",")
 
 

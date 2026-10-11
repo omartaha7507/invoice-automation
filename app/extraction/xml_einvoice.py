@@ -8,7 +8,6 @@ Structured data needs no AI at all: it is parsed exactly, which is faster, free 
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring  # safe against XML bombs and external entities
 
@@ -31,22 +30,22 @@ class EInvoiceParseError(ValueError):
     pass
 
 
-def _text(element, path: str, ns: dict[str, str]) -> Optional[str]:
+def _text(element, path: str, ns: dict[str, str]) -> str | None:
     node = element.find(path, ns)
     if node is None or node.text is None:
         return None
     return node.text.strip() or None
 
 
-def _amount(value: Optional[str]) -> Optional[float]:
+def _amount(value: str | None) -> float | None:
     return round(float(value), 2) if value is not None else None
 
 
-def _number(value: Optional[str]) -> Optional[float]:
+def _number(value: str | None) -> float | None:
     return float(value) if value is not None else None
 
 
-def _cii_date(value: Optional[str]) -> Optional[date]:
+def _cii_date(value: str | None) -> date | None:
     if not value:
         return None
     for fmt in ("%Y%m%d", "%Y-%m-%d"):  # format code 102 is YYYYMMDD
@@ -57,7 +56,7 @@ def _cii_date(value: Optional[str]) -> Optional[date]:
     return None
 
 
-def _iso_date(value: Optional[str]) -> Optional[date]:
+def _iso_date(value: str | None) -> date | None:
     return date.fromisoformat(value) if value else None
 
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass
 from datetime import date
-from typing import Any, Optional
+from typing import Any
 
 from app.constants import STATUS_APPROVED, STATUS_NEEDS_REVIEW
 from app.schemas import DocumentType, ExtractedInvoice
@@ -46,7 +46,7 @@ class Issue:
     code: str
     severity: str
     message: str
-    field: Optional[str] = None
+    field: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -79,7 +79,7 @@ def german_vat_check_digit(first_eight_digits: str) -> int:
     return 0 if check == 10 else check
 
 
-def vat_id_problem(value: str) -> Optional[str]:
+def vat_id_problem(value: str) -> str | None:
     """Returns None if the VAT ID looks valid, otherwise "format" or "checksum"."""
     vat = normalise_vat_id(value)
     country = vat[:2]
@@ -109,8 +109,8 @@ def validate_invoice(
     invoice: ExtractedInvoice,
     *,
     is_duplicate: bool = False,
-    purchase_order: Optional[PurchaseOrderRef] = None,
-    today: Optional[date] = None,
+    purchase_order: PurchaseOrderRef | None = None,
+    today: date | None = None,
 ) -> list[Issue]:
     today = today or date.today()
 

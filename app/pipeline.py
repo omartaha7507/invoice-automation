@@ -9,9 +9,9 @@ import csv
 import hashlib
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
@@ -128,7 +128,7 @@ def erp_payload(invoice: Invoice) -> dict[str, Any]:
     return {"invoice_id": invoice.id, **data, "source_document_sha256": invoice.file_sha256}
 
 
-def add_audit(db: Session, invoice: Invoice, actor: str, action: str, details: Optional[dict] = None) -> None:
+def add_audit(db: Session, invoice: Invoice, actor: str, action: str, details: dict | None = None) -> None:
     db.add(AuditLog(invoice=invoice, actor=actor, action=action, details=details or {}))
 
 
@@ -230,9 +230,9 @@ class InvoicePipeline:
         db: Session,
         invoice: Invoice,
         *,
-        corrections: Optional[ExtractedInvoice] = None,
+        corrections: ExtractedInvoice | None = None,
         reviewer: str = "reviewer",
-        note: Optional[str] = None,
+        note: str | None = None,
     ) -> Invoice:
         if invoice.status == STATUS_APPROVED and invoice.erp_reference:
             raise InvalidStateError("This invoice is already approved and sent to accounting.")
@@ -249,7 +249,7 @@ class InvoicePipeline:
         remaining = self._check(db, invoice_to_extracted(invoice), exclude_id=invoice.id)
         invoice.issues = [issue.to_dict() for issue in remaining]
         invoice.status = STATUS_APPROVED
-        invoice.reviewed_at = datetime.now(timezone.utc)
+        invoice.reviewed_at = datetime.now(UTC)
         add_audit(db, invoice, reviewer, "approved", {"note": note, "overridden_issues": [i.code for i in remaining]})
         self._export(db, invoice, actor=reviewer)
         db.commit()
@@ -260,7 +260,7 @@ class InvoicePipeline:
         if invoice.status == STATUS_APPROVED and invoice.erp_reference:
             raise InvalidStateError("Already sent to accounting. Cancel the booking there instead.")
         invoice.status = STATUS_REJECTED
-        invoice.reviewed_at = datetime.now(timezone.utc)
+        invoice.reviewed_at = datetime.now(UTC)
         add_audit(db, invoice, reviewer, "rejected", {"reason": reason})
         db.commit()
         db.refresh(invoice)
@@ -268,7 +268,7 @@ class InvoicePipeline:
 
     # Internals
 
-    def _check(self, db: Session, extracted: ExtractedInvoice, exclude_id: Optional[int] = None) -> list[Issue]:
+    def _check(self, db: Session, extracted: ExtractedInvoice, exclude_id: int | None = None) -> list[Issue]:
         return validate_invoice(
             extracted,
             is_duplicate=self._is_duplicate(db, extracted, exclude_id),
@@ -276,7 +276,7 @@ class InvoicePipeline:
         )
 
     @staticmethod
-    def _is_duplicate(db: Session, extracted: ExtractedInvoice, exclude_id: Optional[int]) -> bool:
+    def _is_duplicate(db: Session, extracted: ExtractedInvoice, exclude_id: int | None) -> bool:
         """Same invoice number from the same supplier, not counting rejected ones."""
         if not extracted.invoice_number:
             return False
@@ -299,7 +299,7 @@ class InvoicePipeline:
         return (db.scalar(query) or 0) > 0
 
     @staticmethod
-    def _find_purchase_order(db: Session, po_number: Optional[str]) -> Optional[PurchaseOrderRef]:
+    def _find_purchase_order(db: Session, po_number: str | None) -> PurchaseOrderRef | None:
         if not po_number:
             return None
         po = db.get(PurchaseOrder, po_number.strip())

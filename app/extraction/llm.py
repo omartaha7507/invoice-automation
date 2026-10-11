@@ -14,12 +14,11 @@ import re
 import threading
 import time
 from datetime import date, datetime
-from typing import Optional
 
 from pydantic import ValidationError
 
 from app.extraction.base import ExtractionError
-from app.schemas import DocumentType, ExtractedInvoice, LineItemData, LLMInvoice
+from app.schemas import ExtractedInvoice, LineItemData, LLMInvoice
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +61,7 @@ class RateLimiter:
             self._next_allowed = now + self.interval
 
 
-def _parse_date(value: Optional[str]) -> Optional[date]:
+def _parse_date(value: str | None) -> date | None:
     if not value:
         return None
     for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y"):
@@ -73,7 +72,7 @@ def _parse_date(value: Optional[str]) -> Optional[date]:
     return None
 
 
-def _clean(value: Optional[str]) -> Optional[str]:
+def _clean(value: str | None) -> str | None:
     if value is None:
         return None
     value = value.strip()

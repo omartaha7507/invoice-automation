@@ -14,7 +14,7 @@ import shutil
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from evaluation.synth import (
     SCENARIO_ISSUES,
@@ -65,7 +65,7 @@ def _pick(rng: random.Random, weights: dict[str, int]) -> str:
     return rng.choices(list(weights), weights=list(weights.values()))[0]
 
 
-def generate(n: int, seed: int, today: Optional[date] = None) -> tuple[list[GeneratedDoc], list[dict[str, Any]]]:
+def generate(n: int, seed: int, today: date | None = None) -> tuple[list[GeneratedDoc], list[dict[str, Any]]]:
     rng = random.Random(seed)
     today = today or date.today()
     suppliers = [make_supplier(rng, i) for i in range(len(SUPPLIERS))]
