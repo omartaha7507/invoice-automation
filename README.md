@@ -48,15 +48,19 @@ flowchart LR
 
 ## Results
 
-Run `python -m evaluation.run_eval --extractor gemini` with your API key; the full report is written to
-`evaluation/results/gemini.md`.
-
 | Metric | Value |
 |---|---|
-| Field-level extraction accuracy | _fill in from your run_ |
-| Routing accuracy (approve vs. review) | _fill in from your run_ |
-| Faulty invoices auto-approved | _fill in from your run_ |
-| Share of documents read without any LLM call (XML) | _fill in from your run_ |
+| Field-level extraction accuracy | 100% (13 fields, 10 documents including a scanned image; Gemini 3.8 Flash) |
+| Routing accuracy (approve vs. review) | 100% |
+| Faulty invoices auto-approved | 0 |
+| Documents read without any LLM call (XML e-invoices) | 2 of 10 |
+
+Evaluated on the first 10 documents of the 60-document set because of the Gemini free-tier limit of 20 requests
+per day; the full set is checked for rules and routing on every commit with the oracle extractor. During the run,
+three 503 "high demand" errors from the API were recovered automatically by retry with backoff.
+
+Full report: [evaluation/results/gemini.md](evaluation/results/gemini.md). To reproduce, run
+`python -m evaluation.run_eval --extractor gemini` with your API key.
 
 ## Quick start
 
