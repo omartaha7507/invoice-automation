@@ -1,0 +1,63 @@
+{
+  "extractor": "gemini",
+  "documents": 10,
+  "field_accuracy": 1.0,
+  "document_exact_match": 1.0,
+  "routing_accuracy": 1.0,
+  "false_approvals": [],
+  "unnecessary_reviews": [],
+  "per_field": {
+    "document_type": 1.0,
+    "supplier_name": 1.0,
+    "supplier_vat_id": 1.0,
+    "buyer_name": 1.0,
+    "invoice_number": 1.0,
+    "invoice_date": 1.0,
+    "due_date": 1.0,
+    "po_number": 1.0,
+    "currency": 1.0,
+    "net_total": 1.0,
+    "vat_total": 1.0,
+    "gross_total": 1.0,
+    "line_items": 1.0
+  },
+  "per_format": {
+    "pdf_text": 1.0,
+    "xml_cii": 1.0,
+    "xml_ubl": 1.0,
+    "scan_image": 1.0
+  },
+  "issue_detection": {
+    "line_items_sum_mismatch": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "po_amount_mismatch": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "totals_mismatch": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "latency_ms": {
+    "mean": 19472.3,
+    "p95": 35721
+  },
+  "methods": {
+    "llm_text": 7,
+    "llm_vision": 1,
+    "xml": 2
+  },
+  "mistakes": []
+}
