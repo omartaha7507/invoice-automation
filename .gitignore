@@ -9,3 +9,4 @@ data/
 *.db
 inbox/*
 !inbox/.gitkeep
+HOW_IT_WORKS*.md

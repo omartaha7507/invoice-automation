@@ -145,7 +145,6 @@ evaluation/
   generate_dataset.py labelled dataset
   run_eval.py         accuracy and routing metrics, CI quality gate
 tests/                pytest suite
-docs/HOW_IT_WORKS.md  design walkthrough
 ```
 
 ## Limitations and next steps
